@@ -104,6 +104,12 @@ const Login = () => {
               Demo admin: <code className="break-all">admin@lms.com</code> /{' '}
               <code className="break-all">Password123!</code>
             </p>
+            <p className="mb-2 break-words text-[11px] leading-snug text-gray-500 dark:text-gray-400">
+              If login shows <span className="font-medium">Invalid credentials</span>, open a terminal in{' '}
+              <code className="break-all">backend</code> and run{' '}
+              <code className="break-all">npm run db:seed:demo-admin</code>. Wrong password? Run{' '}
+              <code className="break-all">npm run db:seed:demo-admin -- --reset</code>
+            </p>
             <p className="text-sm text-gray-600 dark:text-gray-400">
               Don't have an account?{' '}
               <Link to="/register" className="text-primary-600 hover:text-primary-700 font-medium">
