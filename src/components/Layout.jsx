@@ -19,7 +19,7 @@ const Layout = () => {
       ) : null}
       <div className="flex">
         <Sidebar isOpen={sidebarOpen} onNavigate={() => setSidebarOpen(false)} />
-        <main className="flex-1 min-w-0 w-full p-4 pt-20 pb-8 sm:p-6 sm:pt-24 lg:pl-72">
+        <main className="flex-1 min-w-0 w-full pt-20 pb-8 pl-4 pr-4 sm:pt-24 sm:pl-6 sm:pr-6 lg:pl-[calc(18rem+2.75rem)] lg:pr-8">
           <Outlet />
         </main>
       </div>

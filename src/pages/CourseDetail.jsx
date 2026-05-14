@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../utils/api';
+import { resolveMediaUrl } from '../utils/mediaUrl';
 import toast from 'react-hot-toast';
 import { FiBook, FiUser, FiFileText, FiCheckSquare, FiCalendar, FiAward, FiDownload } from 'react-icons/fi';
 
@@ -119,9 +120,10 @@ const CourseDetail = () => {
       <div className="card">
         {course.thumbnail && (
           <img
-            src={course.thumbnail}
+            src={resolveMediaUrl(course.thumbnail)}
             alt={course.title}
             className="w-full h-64 object-cover rounded-lg mb-6"
+            loading="lazy"
           />
         )}
         <div className="flex items-start justify-between mb-4">

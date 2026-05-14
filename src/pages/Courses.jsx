@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../utils/api';
+import { resolveMediaUrl } from '../utils/mediaUrl';
 import toast from 'react-hot-toast';
 import { FiBook, FiPlus, FiSearch, FiTrendingUp, FiUser } from 'react-icons/fi';
 
@@ -92,7 +93,7 @@ const Courses = () => {
         )}
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4">
         <StatsCard title="Total" value={stats.total} />
         <StatsCard title="Published" value={stats.published} />
         <StatsCard title="Draft" value={stats.draft} />
@@ -151,9 +152,10 @@ const Courses = () => {
             <div key={course.id} className="card hover:shadow-xl transition-shadow">
               {course.thumbnail && (
                 <img
-                  src={course.thumbnail}
+                  src={resolveMediaUrl(course.thumbnail)}
                   alt={course.title}
                   className="w-full h-48 object-cover rounded-lg mb-4"
+                  loading="lazy"
                 />
               )}
               <div className="flex items-start justify-between mb-2 gap-2">
