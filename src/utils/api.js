@@ -1,9 +1,20 @@
 import axios from 'axios';
+import { isPlaceholderApiUrl } from '../config/apiUrlGuards.js';
 
 /** Production must not call localhost — browsers block HTTPS pages from loopback (Private Network Access). */
 function normalizeApiBase() {
   const raw = (import.meta.env.VITE_API_URL || '').trim().replace(/\/+$/, '');
-  if (raw) return raw.endsWith('/api') ? raw : `${raw}/api`;
+  if (raw) {
+    const base = raw.endsWith('/api') ? raw : `${raw}/api`;
+    if (import.meta.env.PROD && isPlaceholderApiUrl(base)) {
+      // eslint-disable-next-line no-console
+      console.error(
+        '[LMS] VITE_API_URL is an example/placeholder. Vercel → Environment Variables → set it to your REAL backend URL from the backend project + /api, then redeploy.'
+      );
+      return null;
+    }
+    return base;
+  }
   if (import.meta.env.DEV) return '/api';
   if (import.meta.env.PROD) {
     // eslint-disable-next-line no-console
@@ -35,6 +46,13 @@ api.interceptors.request.use((config) => {
     return Promise.reject(
       new Error(
         'Browser blocked localhost (old or wrong build). Frontend Vercel → set VITE_API_URL = https://YOUR-BACKEND.vercel.app/api → Redeploy. If code is in a separate GitHub repo, push latest frontend from this project first.'
+      )
+    );
+  }
+  if (onPublicSite && isPlaceholderApiUrl(base)) {
+    return Promise.reject(
+      new Error(
+        'VITE_API_URL is still a placeholder (e.g. your-lms-backend). In Vercel → Frontend project → Environment Variables, set VITE_API_URL to your actual backend URL from the backend Vercel deployment + /api, then redeploy.'
       )
     );
   }
