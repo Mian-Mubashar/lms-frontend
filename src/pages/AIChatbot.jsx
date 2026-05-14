@@ -18,6 +18,9 @@ const resolveAudioUrl = (audioUrl) => {
   if (!audioUrl) {
     return '';
   }
+  if (audioUrl.startsWith('data:')) {
+    return audioUrl;
+  }
   if (/^https?:\/\//i.test(audioUrl)) {
     return audioUrl;
   }
