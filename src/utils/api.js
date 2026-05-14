@@ -1,9 +1,20 @@
 import axios from 'axios';
 
-// Dev: use Vite proxy (vite.config.js → /api → backend). Prod: set VITE_API_URL to your deployed API.
-const API_URL =
-  import.meta.env.VITE_API_URL ||
-  (import.meta.env.DEV ? '/api' : 'http://localhost:5000/api');
+function normalizeApiBase() {
+  const raw = (import.meta.env.VITE_API_URL || '').trim().replace(/\/+$/, '');
+  if (raw) return raw.endsWith('/api') ? raw : `${raw}/api`;
+  if (import.meta.env.DEV) return '/api';
+  // Local production build without VITE_API_URL (not on Vercel — check script skips there)
+  if (import.meta.env.PROD) {
+    // eslint-disable-next-line no-console
+    console.warn(
+      '[LMS] VITE_API_URL is unset. Production API calls may fail. Set it before deploy, e.g. https://your-backend.vercel.app/api'
+    );
+  }
+  return 'http://localhost:5000/api';
+}
+
+const API_URL = normalizeApiBase();
 
 const api = axios.create({
   baseURL: API_URL,
