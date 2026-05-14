@@ -1,11 +1,11 @@
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
-import { FiSun, FiMoon, FiBell, FiUser } from 'react-icons/fi';
+import { FiSun, FiMoon, FiBell, FiUser, FiMenu } from 'react-icons/fi';
 import { useState, useEffect } from 'react';
 import api from '../utils/api';
 
-const Header = () => {
+const Header = ({ onMenuClick }) => {
   const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const [notifications, setNotifications] = useState([]);
@@ -37,14 +37,27 @@ const Header = () => {
 
   return (
     <header className="fixed top-0 left-0 right-0 bg-white dark:bg-gray-800 shadow-md z-50">
-      <div className="flex items-center justify-between px-6 py-4">
-        <div className="flex items-center">
-          <Link to={homePath} className="text-2xl font-bold text-primary-600">
+      <div className="flex items-center justify-between gap-2 px-4 py-3 sm:px-6 sm:py-4">
+        <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
+          {typeof onMenuClick === 'function' ? (
+            <button
+              type="button"
+              onClick={onMenuClick}
+              className="shrink-0 rounded-lg p-2 text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700 lg:hidden"
+              aria-label="Open menu"
+            >
+              <FiMenu className="h-6 w-6" />
+            </button>
+          ) : null}
+          <Link
+            to={homePath}
+            className="truncate text-xl font-bold text-primary-600 sm:text-2xl"
+          >
             AI LMS
           </Link>
         </div>
 
-        <div className="flex items-center space-x-4">
+        <div className="flex shrink-0 items-center gap-2 sm:gap-4">
           {/* Theme Toggle */}
           <button
             onClick={toggleTheme}
@@ -72,7 +85,7 @@ const Header = () => {
             </button>
 
             {showNotifications && (
-              <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 max-h-96 overflow-y-auto">
+              <div className="fixed right-4 top-16 z-[60] w-[min(22rem,calc(100vw-2rem))] rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800 sm:absolute sm:right-0 sm:top-auto sm:mt-2 sm:w-80 max-h-[min(24rem,70vh)] overflow-y-auto">
                 <div className="p-4 border-b border-gray-200 dark:border-gray-700">
                   <h3 className="font-semibold">Notifications</h3>
                 </div>
@@ -109,7 +122,7 @@ const Header = () => {
             </button>
 
             {showProfileMenu && (
-              <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
+              <div className="fixed right-4 top-16 z-[60] w-48 rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800 sm:absolute sm:right-0 sm:top-auto sm:mt-2">
                 <Link
                   to="/profile"
                   className="block px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-700"

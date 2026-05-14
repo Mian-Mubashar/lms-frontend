@@ -80,7 +80,7 @@ const Dashboard = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white sm:text-3xl mb-2 break-words">
           Welcome back, {user?.firstName}!
         </h1>
         <p className="text-gray-600 dark:text-gray-400">
@@ -89,12 +89,12 @@ const Dashboard = () => {
       </div>
 
       <div className="card">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-xl font-semibold flex items-center gap-2">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-3">
+          <h3 className="text-lg font-semibold flex items-center gap-2 sm:text-xl">
             <FiCpu className="w-5 h-5 text-primary-600" />
             AI Insights
           </h3>
-          <button onClick={fetchAIInsights} disabled={insightsLoading} className="btn-primary text-sm disabled:opacity-50">
+          <button onClick={fetchAIInsights} disabled={insightsLoading} className="btn-primary w-full shrink-0 text-sm disabled:opacity-50 sm:w-auto">
             {insightsLoading ? 'Analyzing...' : 'Generate Insights'}
           </button>
         </div>

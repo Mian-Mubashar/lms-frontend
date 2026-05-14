@@ -213,7 +213,16 @@ function AppContent() {
         </Routes>
       </Router>
 
-      <Toaster position="top-right" />
+      <Toaster
+        position="top-center"
+        toastOptions={{
+          className: 'text-sm max-w-[min(100%,20rem)]',
+          duration: 4000
+        }}
+        containerStyle={{
+          top: 'max(1rem, env(safe-area-inset-top, 0px))'
+        }}
+      />
     </div>
   );
 }

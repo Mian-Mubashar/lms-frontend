@@ -13,7 +13,7 @@ import {
   FiCpu
 } from 'react-icons/fi';
 
-const Sidebar = () => {
+const Sidebar = ({ isOpen = false, onNavigate }) => {
   const { user } = useAuth();
   const location = useLocation();
 
@@ -60,26 +60,31 @@ const Sidebar = () => {
     ? teacherMenu 
     : studentMenu;
 
+  const panelClass =
+    'fixed left-0 top-16 z-40 h-[calc(100dvh-4rem)] w-[min(18rem,88vw)] max-w-sm bg-white dark:bg-gray-800 shadow-xl overflow-y-auto border-r border-gray-200 dark:border-gray-700 transition-transform duration-200 ease-out lg:translate-x-0 ' +
+    (isOpen ? 'translate-x-0' : '-translate-x-full');
+
   return (
-    <aside className="fixed left-0 top-16 h-[calc(100vh-4rem)] w-64 bg-white dark:bg-gray-800 shadow-lg overflow-y-auto">
-      <nav className="p-4">
-        <ul className="space-y-2">
+    <aside className={panelClass}>
+      <nav className="p-3 sm:p-4">
+        <ul className="space-y-1 sm:space-y-2">
           {menuItems.map((item) => {
             const Icon = item.icon;
             const isActive = location.pathname === item.path;
-            
+
             return (
               <li key={item.path}>
                 <Link
                   to={item.path}
-                  className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
+                  onClick={() => onNavigate?.()}
+                  className={`flex items-center gap-3 px-3 py-2.5 sm:px-4 sm:py-3 rounded-lg text-sm sm:text-base transition-colors ${
                     isActive
                       ? 'bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300'
                       : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
                   }`}
                 >
-                  <Icon className="w-5 h-5" />
-                  <span>{item.label}</span>
+                  <Icon className="w-5 h-5 shrink-0" />
+                  <span className="truncate">{item.label}</span>
                 </Link>
               </li>
             );

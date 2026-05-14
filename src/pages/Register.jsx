@@ -56,21 +56,21 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-500 to-primary-700 px-4 py-12">
-      <div className="max-w-md w-full">
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8">
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-100 dark:bg-primary-900 rounded-full mb-4">
-              <FiBook className="w-8 h-8 text-primary-600 dark:text-primary-400" />
+    <div className="min-h-screen min-h-[100dvh] flex items-center justify-center bg-gradient-to-br from-primary-500 to-primary-700 px-4 py-8 sm:py-12 safe-area-pb">
+      <div className="w-full max-w-md">
+        <div className="rounded-2xl bg-white p-5 shadow-xl dark:bg-gray-800 sm:p-8">
+          <div className="mb-6 text-center sm:mb-8">
+            <div className="mb-3 inline-flex h-14 w-14 items-center justify-center rounded-full bg-primary-100 dark:bg-primary-900 sm:mb-4 sm:h-16 sm:w-16">
+              <FiBook className="h-7 w-7 text-primary-600 dark:text-primary-400 sm:h-8 sm:w-8" />
             </div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white sm:text-3xl mb-2">
               Create Account
             </h1>
             <p className="text-gray-600 dark:text-gray-400">Join our learning platform</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   First Name
