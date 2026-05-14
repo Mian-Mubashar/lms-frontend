@@ -10,7 +10,9 @@ import {
   FiBarChart,
   FiMessageCircle,
   FiUsers,
-  FiCpu
+  FiCpu,
+  FiTrendingUp,
+  FiEdit3
 } from 'react-icons/fi';
 
 const Sidebar = ({ isOpen = false, onNavigate }) => {
@@ -50,15 +52,20 @@ const Sidebar = ({ isOpen = false, onNavigate }) => {
     { path: '/attendance', label: 'Attendance', icon: FiCalendar },
     { path: '/analytics', label: 'Analytics', icon: FiBarChart },
     { path: '/ai-chatbot', label: 'AI Assistant', icon: FiMessageCircle },
-    { path: '/ai-pro', label: 'AI Pro Studio', icon: FiCpu },
-    { path: '/ai-exam-lab', label: 'AI Exam Lab', icon: FiCpu },
+    { path: '/ai-admin-insights', label: 'AI Platform Insights', icon: FiTrendingUp },
+    { path: '/ai-admin-announcements', label: 'AI Announcement Studio', icon: FiEdit3 },
   ];
 
-  const menuItems = user?.role === 'admin' 
-    ? adminMenu 
-    : user?.role === 'teacher' 
-    ? teacherMenu 
-    : studentMenu;
+  const normalizedRole = String(user?.role ?? '')
+    .trim()
+    .toLowerCase();
+
+  const menuItems =
+    normalizedRole === 'admin'
+      ? adminMenu
+      : normalizedRole === 'teacher'
+        ? teacherMenu
+        : studentMenu;
 
   const panelClass =
     'fixed left-0 top-16 z-40 h-[calc(100dvh-4rem)] w-[min(18rem,88vw)] max-w-sm bg-white dark:bg-gray-800 shadow-xl overflow-y-auto border-r border-gray-200 dark:border-gray-700 transition-transform duration-200 ease-out lg:translate-x-0 ' +

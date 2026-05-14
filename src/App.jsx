@@ -120,13 +120,18 @@ import Analytics from './pages/Analytics';
 import AIChatbot from './pages/AIChatbot';
 import AIProStudio from './pages/AIProStudio';
 import AIExamLab from './pages/AIExamLab';
+import AIAdminInsights from './pages/AIAdminInsights';
+import AIAdminAnnouncements from './pages/AIAdminAnnouncements';
 import AIStudyCoach from './pages/AIStudyCoach';
 import Profile from './pages/Profile';
 import Users from './pages/Users';
 import GradeStudents from './pages/GradeStudents';
 
+const normalizeRole = (role) => String(role ?? '').trim().toLowerCase();
+
 const getDefaultRouteForRole = (role) => {
-  if (role === 'admin' || role === 'teacher') {
+  const r = normalizeRole(role);
+  if (r === 'admin' || r === 'teacher') {
     return '/dashboard';
   }
   return '/courses';
@@ -167,7 +172,9 @@ const RoleRoute = ({ children, allowedRoles }) => {
     return <Navigate to="/login" replace />;
   }
 
-  if (!allowedRoles.includes(user.role)) {
+  const userRole = normalizeRole(user.role);
+  const allowed = allowedRoles.map((r) => normalizeRole(r));
+  if (!allowed.includes(userRole)) {
     return <Navigate to={getDefaultRouteForRole(user.role)} replace />;
   }
 
@@ -202,11 +209,13 @@ function AppContent() {
             <Route path="analytics" element={<Analytics />} />
             <Route path="grade-students" element={<RoleRoute allowedRoles={['teacher', 'admin']}><GradeStudents /></RoleRoute>} />
             <Route path="ai-chatbot" element={<AIChatbot />} />
-            <Route path="ai-pro" element={<RoleRoute allowedRoles={['teacher', 'admin']}><AIProStudio /></RoleRoute>} />
-            <Route path="ai-exam-lab" element={<RoleRoute allowedRoles={['teacher', 'admin']}><AIExamLab /></RoleRoute>} />
+            <Route path="ai-pro" element={<RoleRoute allowedRoles={['teacher']}><AIProStudio /></RoleRoute>} />
+            <Route path="ai-exam-lab" element={<RoleRoute allowedRoles={['teacher']}><AIExamLab /></RoleRoute>} />
             <Route path="ai-study-coach" element={<RoleRoute allowedRoles={['student']}><AIStudyCoach /></RoleRoute>} />
             <Route path="profile" element={<Profile />} />
             <Route path="users" element={<RoleRoute allowedRoles={['admin']}><Users /></RoleRoute>} />
+            <Route path="ai-admin-insights" element={<RoleRoute allowedRoles={['admin']}><AIAdminInsights /></RoleRoute>} />
+            <Route path="ai-admin-announcements" element={<RoleRoute allowedRoles={['admin']}><AIAdminAnnouncements /></RoleRoute>} />
           </Route>
 
           <Route path="*" element={<Navigate to="/" replace />} />

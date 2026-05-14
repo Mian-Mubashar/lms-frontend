@@ -4,6 +4,13 @@ import api from '../utils/api';
 
 const AuthContext = createContext();
 
+/** API / legacy rows may return mixed-case roles; sidebar + RoleRoute expect lowercase. */
+const sanitizeUser = (u) => {
+  if (!u || typeof u !== 'object') return u;
+  const role = String(u.role ?? 'student').trim().toLowerCase();
+  return { ...u, role: role || 'student' };
+};
+
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
@@ -29,7 +36,7 @@ export const AuthProvider = ({ children }) => {
   const fetchUser = async () => {
     try {
       const response = await api.get('/auth/me');
-      setUser(response.data.user);
+      setUser(sanitizeUser(response.data.user));
     } catch (error) {
       localStorage.removeItem('token');
       setUser(null);
@@ -42,7 +49,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await api.post('/auth/login', { email, password });
       localStorage.setItem('token', response.data.token);
-      setUser(response.data.user);
+      setUser(sanitizeUser(response.data.user));
       toast.success('Login successful!');
       return response.data;
     } catch (error) {
@@ -59,7 +66,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await api.post('/auth/register', userData);
       localStorage.setItem('token', response.data.token);
-      setUser(response.data.user);
+      setUser(sanitizeUser(response.data.user));
       toast.success('Registration successful!');
       return response.data;
     } catch (error) {
@@ -79,7 +86,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const updateUser = (userData) => {
-    setUser({ ...user, ...userData });
+    setUser((prev) => sanitizeUser({ ...prev, ...userData }));
   };
 
   const value = {
