@@ -26,6 +26,18 @@ const api = axios.create({
 
 // Add token to requests
 api.interceptors.request.use((config) => {
+  const base = String(config.baseURL ?? api.defaults.baseURL ?? '');
+  const onPublicSite =
+    typeof window !== 'undefined' &&
+    window.location.protocol === 'https:' &&
+    !['localhost', '127.0.0.1'].includes(window.location.hostname);
+  if (onPublicSite && (/localhost/i.test(base) || base.includes('127.0.0.1'))) {
+    return Promise.reject(
+      new Error(
+        'Browser blocked localhost (old or wrong build). Frontend Vercel → set VITE_API_URL = https://YOUR-BACKEND.vercel.app/api → Redeploy. If code is in a separate GitHub repo, push latest frontend from this project first.'
+      )
+    );
+  }
   if (import.meta.env.PROD && API_URL === null) {
     return Promise.reject(
       new Error(
