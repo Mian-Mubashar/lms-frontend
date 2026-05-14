@@ -91,10 +91,9 @@ const AIChatbot = () => {
 
   const handleTextToSpeech = async (text) => {
     try {
-      toast.loading('Converting to speech...', { id: 'tts' });
-      const response = await api.post('/ai/text-to-speech', { 
-        text,
-        provider: 'openai'
+      toast.loading('Preparing voice…', { id: 'tts' });
+      const response = await api.post('/ai/text-to-speech', {
+        text
       });
       
       const audioSrc = resolveAudioUrl(response.data.audioUrl);
@@ -110,7 +109,7 @@ const AIChatbot = () => {
         toast.error('Failed to play audio', { id: 'tts' });
       };
       audio.play();
-      toast.success('Playing audio (OpenAI)', { id: 'tts' });
+      toast.success('Voice playback started', { id: 'tts' });
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to convert text to speech', { id: 'tts' });
       console.error('TTS error:', error);
@@ -173,12 +172,13 @@ const AIChatbot = () => {
                 {message.role === 'assistant' && (
                   <div className="mt-2 flex items-center space-x-2">
                     <button
+                      type="button"
                       onClick={() => handleTextToSpeech(message.content)}
                       className="text-sm text-primary-600 hover:text-primary-700 flex items-center px-2 py-1 rounded hover:bg-primary-50 dark:hover:bg-primary-900"
-                      title="Listen with OpenAI TTS"
+                      title="Play this reply as voice (text-to-speech)"
                     >
-                      <FiVolume2 className="w-4 h-4 mr-1" />
-                      OpenAI
+                      <FiVolume2 className="w-4 h-4 mr-1 shrink-0" aria-hidden />
+                      Listen aloud
                     </button>
                   </div>
                 )}
