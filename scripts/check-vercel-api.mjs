@@ -1,21 +1,37 @@
 /**
  * Vercel sets VERCEL=1 during build. Require a real public VITE_API_URL (not examples).
+ * Self-contained (no imports) so this always runs even if a split GitHub repo missed a file.
  */
-import { isPlaceholderApiUrl } from '../src/config/apiUrlGuards.js';
-
 const v = String(process.env.VITE_API_URL || '').trim();
+
+function isPlaceholderApiUrl(url) {
+  const u = String(url || '').toLowerCase();
+  const bad = [
+    'your-lms-backend',
+    'your-backend',
+    'example.com',
+    '<your',
+    'changeme',
+    'paste-here'
+  ];
+  return bad.some((s) => u.includes(s));
+}
 
 if (process.env.VERCEL === '1') {
   if (!v) {
     console.error(`
-[Vercel] Missing VITE_API_URL
+[Vercel] Missing VITE_API_URL  →  npm run build exits 1 on purpose.
 
-In your FRONTEND Vercel project:
-  Settings → Environment Variables
-  Name:  VITE_API_URL
-  Value: copy from BACKEND project → Deployments → your production URL, then add /api
-  Example: https://lms-backend-xxxxx.vercel.app/api
-  Enable: Production + Preview → Save → Redeploy
+Fix:
+  1) Open your FRONTEND project on Vercel (the one that builds this app).
+  2) Settings → Environment Variables → Add:
+       Name:   VITE_API_URL
+       Value:  https://<YOUR-REAL-BACKEND>.vercel.app/api
+       (Copy the backend URL from your BACKEND Vercel project → Deployments / Domains, then add /api)
+  3) Enable this variable for Production AND Preview (all deploy targets you use).
+  4) Save → Deployments → Redeploy (or push a new commit).
+
+If you use two GitHub repos, add the variable in the Vercel project that is linked to THIS repo.
 `);
     process.exit(1);
   }
@@ -39,8 +55,8 @@ Got: ${v.slice(0, 80)}${v.length > 80 ? '…' : ''}
     console.error(`
 [Vercel] VITE_API_URL looks like a placeholder / example, not your real backend.
 
-Do NOT use: your-lms-backend, example.com, or README text.
-DO use the exact URL from your BACKEND Vercel project (Domains or latest deployment), + /api
+Replace it with the exact HTTPS URL from your BACKEND Vercel project + /api
+(do not use README / example hostnames).
 `);
     process.exit(1);
   }
