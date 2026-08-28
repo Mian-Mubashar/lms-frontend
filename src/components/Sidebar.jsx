@@ -13,7 +13,8 @@ import {
   FiUsers,
   FiCpu,
   FiTrendingUp,
-  FiEdit3
+  FiEdit3,
+  FiUser
 } from 'react-icons/fi';
 
 const Sidebar = ({ isOpen = false, onNavigate }) => {
@@ -21,7 +22,7 @@ const Sidebar = ({ isOpen = false, onNavigate }) => {
   const location = useLocation();
 
   const handleNavClick = (event, path) => {
-    if (teacherApplicationPending && path !== '/dashboard') {
+    if (teacherApplicationPending && path !== '/dashboard' && path !== '/profile') {
       event.preventDefault();
       toast.error('Available after admin approves your teacher account.');
       return;
@@ -39,6 +40,7 @@ const Sidebar = ({ isOpen = false, onNavigate }) => {
     { path: '/analytics', label: 'Analytics', icon: FiBarChart },
     { path: '/ai-chatbot', label: 'AI Assistant', icon: FiMessageCircle },
     { path: '/ai-study-coach', label: 'AI Study Coach', icon: FiCpu },
+    { path: '/profile', label: 'Profile', icon: FiUser },
   ];
 
   const teacherMenu = [
@@ -51,6 +53,7 @@ const Sidebar = ({ isOpen = false, onNavigate }) => {
     { path: '/ai-chatbot', label: 'AI Assistant', icon: FiMessageCircle },
     { path: '/ai-pro', label: 'AI Pro Studio', icon: FiCpu },
     { path: '/ai-exam-lab', label: 'AI Exam Lab', icon: FiCpu },
+    { path: '/profile', label: 'Profile', icon: FiUser },
   ];
 
   const adminMenu = [
@@ -64,6 +67,7 @@ const Sidebar = ({ isOpen = false, onNavigate }) => {
     { path: '/ai-chatbot', label: 'AI Assistant', icon: FiMessageCircle },
     { path: '/ai-admin-insights', label: 'AI Platform Insights', icon: FiTrendingUp },
     { path: '/ai-admin-announcements', label: 'AI Announcement Studio', icon: FiEdit3 },
+    { path: '/profile', label: 'Profile', icon: FiUser },
   ];
 
   const normalizedRole = String(user?.role ?? '')
@@ -97,7 +101,7 @@ const Sidebar = ({ isOpen = false, onNavigate }) => {
                   className={`flex items-center gap-3 px-3 py-2.5 sm:px-4 sm:py-3 rounded-lg text-sm sm:text-base transition-colors ${
                     isActive
                       ? 'bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300'
-                      : teacherApplicationPending && item.path !== '/dashboard'
+                      : teacherApplicationPending && item.path !== '/dashboard' && item.path !== '/profile'
                         ? 'text-gray-400 dark:text-gray-500 cursor-not-allowed opacity-70'
                         : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
                   }`}

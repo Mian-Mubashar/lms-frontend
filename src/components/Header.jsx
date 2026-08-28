@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
+import { resolveMediaUrl } from '../utils/mediaUrl';
 import { FiSun, FiMoon, FiBell, FiUser, FiMenu } from 'react-icons/fi';
 import { useState, useEffect } from 'react';
 import api from '../utils/api';
@@ -78,9 +79,13 @@ const Header = ({ onMenuClick }) => {
           {/* Notifications */}
           <div className="relative">
             <button
-              onClick={() => setShowNotifications(!showNotifications)}
+              onClick={() => {
+                setShowProfileMenu(false);
+                setShowNotifications((prev) => !prev);
+              }}
               className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 relative"
               aria-label="Notifications"
+              aria-expanded={showNotifications}
             >
               <FiBell className="w-5 h-5" />
               {notifications.length > 0 && (
@@ -118,10 +123,22 @@ const Header = ({ onMenuClick }) => {
           {/* Profile Menu */}
           <div className="relative">
             <button
-              onClick={() => setShowProfileMenu(!showProfileMenu)}
+              onClick={() => {
+                setShowNotifications(false);
+                setShowProfileMenu((prev) => !prev);
+              }}
               className="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+              aria-expanded={showProfileMenu}
             >
-              <FiUser className="w-5 h-5" />
+              {user?.avatar ? (
+                <img
+                  src={resolveMediaUrl(user.avatar)}
+                  alt=""
+                  className="w-8 h-8 rounded-full object-cover"
+                />
+              ) : (
+                <FiUser className="w-5 h-5" />
+              )}
               <span className="hidden md:block">{user?.firstName}</span>
             </button>
 
