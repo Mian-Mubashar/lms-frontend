@@ -22,6 +22,24 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [teacherApplicationPending, setTeacherApplicationPending] = useState(false);
+
+  const syncTeacherApplicationStatus = async (role) => {
+    if (role !== 'student') {
+      setTeacherApplicationPending(false);
+      return false;
+    }
+
+    try {
+      const response = await api.get('/teacher-applications/me');
+      const pending = response.data.application?.status === 'pending';
+      setTeacherApplicationPending(pending);
+      return pending;
+    } catch {
+      setTeacherApplicationPending(false);
+      return false;
+    }
+  };
 
   // Check for existing session
   useEffect(() => {
@@ -36,10 +54,13 @@ export const AuthProvider = ({ children }) => {
   const fetchUser = async () => {
     try {
       const response = await api.get('/auth/me');
-      setUser(sanitizeUser(response.data.user));
+      const nextUser = sanitizeUser(response.data.user);
+      setUser(nextUser);
+      await syncTeacherApplicationStatus(nextUser.role);
     } catch (error) {
       localStorage.removeItem('token');
       setUser(null);
+      setTeacherApplicationPending(false);
     } finally {
       setLoading(false);
     }
@@ -49,9 +70,11 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await api.post('/auth/login', { email, password });
       localStorage.setItem('token', response.data.token);
-      setUser(sanitizeUser(response.data.user));
+      const nextUser = sanitizeUser(response.data.user);
+      setUser(nextUser);
+      const teacherApplicationPending = await syncTeacherApplicationStatus(nextUser.role);
       toast.success('Login successful!');
-      return response.data;
+      return { ...response.data, teacherApplicationPending };
     } catch (error) {
       const serverMessage =
         error.response?.data?.message ||
@@ -66,7 +89,9 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await api.post('/auth/register', userData);
       localStorage.setItem('token', response.data.token);
-      setUser(sanitizeUser(response.data.user));
+      const nextUser = sanitizeUser(response.data.user);
+      setUser(nextUser);
+      setTeacherApplicationPending(Boolean(response.data.teacherApplicationPending));
       toast.success('Registration successful!');
       return response.data;
     } catch (error) {
@@ -82,6 +107,7 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     localStorage.removeItem('token');
     setUser(null);
+    setTeacherApplicationPending(false);
     toast.success('Logged out successfully');
   };
 
@@ -92,11 +118,13 @@ export const AuthProvider = ({ children }) => {
   const value = {
     user,
     loading,
+    teacherApplicationPending,
     login,
     register,
     logout,
     updateUser,
-    fetchUser
+    fetchUser,
+    syncTeacherApplicationStatus
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

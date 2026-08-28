@@ -6,12 +6,16 @@ import { useState, useEffect } from 'react';
 import api from '../utils/api';
 
 const Header = ({ onMenuClick }) => {
-  const { user, logout } = useAuth();
+  const { user, logout, teacherApplicationPending } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const [notifications, setNotifications] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
-  const homePath = user?.role === 'student' ? '/courses' : '/dashboard';
+  const homePath = teacherApplicationPending
+    ? '/dashboard'
+    : user?.role === 'student'
+      ? '/courses'
+      : '/dashboard';
 
   useEffect(() => {
     fetchNotifications();

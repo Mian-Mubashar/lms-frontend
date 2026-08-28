@@ -18,13 +18,6 @@ const Register = () => {
   const { register } = useAuth();
   const navigate = useNavigate();
 
-  const getRedirectPathByRole = (role) => {
-    if (role === 'admin' || role === 'teacher') {
-      return '/dashboard';
-    }
-    return '/courses';
-  };
-
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
@@ -47,7 +40,12 @@ const Register = () => {
         password: formData.password,
         role: formData.role
       });
-      navigate(getRedirectPathByRole(data?.user?.role), { replace: true });
+      navigate('/dashboard', {
+        replace: true,
+        state: {
+          teacherApplicationPending: Boolean(data?.teacherApplicationPending)
+        }
+      });
     } catch (error) {
       console.error('Registration error:', error);
     } finally {
@@ -124,8 +122,13 @@ const Register = () => {
                 className="input-field"
               >
                 <option value="student">Student</option>
-                <option value="teacher">Teacher</option>
+                <option value="teacher">Teacher (requires admin approval)</option>
               </select>
+              {formData.role === 'teacher' && (
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  Your account will be created as a student until an admin approves your teacher request.
+                </p>
+              )}
             </div>
 
             <div>

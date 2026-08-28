@@ -1,4 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import { useAuth } from '../contexts/AuthContext';
 import {
   FiHome,
@@ -16,8 +17,17 @@ import {
 } from 'react-icons/fi';
 
 const Sidebar = ({ isOpen = false, onNavigate }) => {
-  const { user } = useAuth();
+  const { user, teacherApplicationPending } = useAuth();
   const location = useLocation();
+
+  const handleNavClick = (event, path) => {
+    if (teacherApplicationPending && path !== '/dashboard') {
+      event.preventDefault();
+      toast.error('Available after admin approves your teacher account.');
+      return;
+    }
+    onNavigate?.();
+  };
 
   const studentMenu = [
     { path: '/dashboard', label: 'Dashboard', icon: FiHome },
@@ -83,11 +93,13 @@ const Sidebar = ({ isOpen = false, onNavigate }) => {
               <li key={item.path}>
                 <Link
                   to={item.path}
-                  onClick={() => onNavigate?.()}
+                  onClick={(event) => handleNavClick(event, item.path)}
                   className={`flex items-center gap-3 px-3 py-2.5 sm:px-4 sm:py-3 rounded-lg text-sm sm:text-base transition-colors ${
                     isActive
                       ? 'bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300'
-                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                      : teacherApplicationPending && item.path !== '/dashboard'
+                        ? 'text-gray-400 dark:text-gray-500 cursor-not-allowed opacity-70'
+                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
                   }`}
                 >
                   <Icon className="w-5 h-5 shrink-0" />

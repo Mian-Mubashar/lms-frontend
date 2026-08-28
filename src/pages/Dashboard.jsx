@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { Link } from 'react-router-dom';
 import api from '../utils/api';
 import toast from 'react-hot-toast';
 import {
@@ -14,20 +14,31 @@ import {
   FiPlus,
   FiBarChart2,
   FiEdit3,
-  FiActivity
+  FiActivity,
+  FiClock
 } from 'react-icons/fi';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
 const Dashboard = () => {
-  const { user } = useAuth();
+  const { user, loading: authLoading, teacherApplicationPending } = useAuth();
+  const location = useLocation();
   const [analytics, setAnalytics] = useState(null);
   const [loading, setLoading] = useState(true);
   const [aiInsights, setAiInsights] = useState([]);
   const [insightsLoading, setInsightsLoading] = useState(false);
 
+  const isPendingTeacher =
+    teacherApplicationPending ||
+    (location.state?.teacherApplicationPending && user?.role === 'student');
+
   useEffect(() => {
+    if (authLoading) return;
+    if (isPendingTeacher) {
+      setLoading(false);
+      return;
+    }
     fetchAnalytics();
-  }, []);
+  }, [authLoading, isPendingTeacher]);
 
   const fetchAnalytics = async () => {
     try {
@@ -64,6 +75,9 @@ const Dashboard = () => {
             .filter(Boolean)
         : [];
       setAiInsights(normalizedInsights);
+      if (response.data?.notice) {
+        toast(response.data.notice, { icon: 'ℹ️' });
+      }
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to load AI insights');
     } finally {
@@ -71,7 +85,7 @@ const Dashboard = () => {
     }
   };
 
-  if (loading) {
+  if (loading || authLoading) {
     return <div className="flex justify-center items-center h-64">Loading...</div>;
   }
 
@@ -79,6 +93,25 @@ const Dashboard = () => {
 
   return (
     <div className="space-y-6">
+      {isPendingTeacher && (
+        <div className="rounded-xl border border-yellow-200 dark:border-yellow-800 bg-yellow-50 dark:bg-yellow-900/20 p-4 sm:p-5">
+          <div className="flex gap-3">
+            <FiClock className="w-6 h-6 shrink-0 text-yellow-600 dark:text-yellow-400 mt-0.5" />
+            <div>
+              <h2 className="font-semibold text-yellow-900 dark:text-yellow-100">
+                Teacher account pending approval
+              </h2>
+              <p className="text-sm text-yellow-800 dark:text-yellow-200 mt-1">
+                Your request has been sent to the admin. You will get full teacher dashboard access
+                after your account is approved. Until then, only this page is available.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {!isPendingTeacher && (
+        <>
       <div>
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white sm:text-3xl mb-2 break-words">
           Welcome back, {user?.firstName}!
@@ -339,6 +372,8 @@ const Dashboard = () => {
           </Link>
         </div>
       </div>
+        </>
+      )}
     </div>
   );
 };

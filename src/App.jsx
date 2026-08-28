@@ -183,7 +183,11 @@ const RoleRoute = ({ children, allowedRoles }) => {
 
 function AppContent() {
   const { theme } = useTheme();
-  const { user } = useAuth();
+  const { user, teacherApplicationPending } = useAuth();
+
+  const defaultRoute = teacherApplicationPending
+    ? '/dashboard'
+    : getDefaultRouteForRole(user?.role);
 
   return (
     <div className={theme}>
@@ -197,7 +201,7 @@ function AppContent() {
           <Route path="/forgot-password" element={<PublicOnlyRoute><ForgotPassword /></PublicOnlyRoute>} />
 
           <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
-            <Route index element={<Navigate to={getDefaultRouteForRole(user?.role)} replace />} />
+            <Route index element={<Navigate to={defaultRoute} replace />} />
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="courses" element={<Courses />} />
             <Route path="courses/new" element={<RoleRoute allowedRoles={['admin', 'teacher']}><CreateCourse /></RoleRoute>} />

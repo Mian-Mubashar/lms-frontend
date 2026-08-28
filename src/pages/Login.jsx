@@ -24,7 +24,10 @@ const Login = () => {
     
     try {
       const data = await login(email, password);
-      navigate(getRedirectPathByRole(data?.user?.role), { replace: true });
+      const redirectPath = data?.teacherApplicationPending
+        ? '/dashboard'
+        : getRedirectPathByRole(data?.user?.role);
+      navigate(redirectPath, { replace: true });
     } catch (error) {
       console.error('Login error:', error);
     } finally {
