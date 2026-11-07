@@ -4,7 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import api from '../utils/api';
 import { resolveMediaUrl } from '../utils/mediaUrl';
 import toast from 'react-hot-toast';
-import { FiBook, FiPlus, FiSearch, FiTrendingUp, FiUser } from 'react-icons/fi';
+import { FiArchive, FiBook, FiPlus, FiSearch, FiTrash2, FiTrendingUp, FiUser, FiX } from 'react-icons/fi';
 
 const Courses = () => {
   const { user } = useAuth();
@@ -13,6 +13,8 @@ const Courses = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filter, setFilter] = useState('all');
   const [sortBy, setSortBy] = useState('latest');
+  const [busyId, setBusyId] = useState(null);
+  const [courseToDelete, setCourseToDelete] = useState(null);
 
   useEffect(() => {
     fetchCourses();
@@ -35,6 +37,39 @@ const Courses = () => {
       toast.error('Failed to load courses');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const canManageCourse = (course) =>
+    user?.role === 'admin' ||
+    (user?.role === 'teacher' && String(course.instructorId) === String(user.id));
+
+  const updateCourseStatus = async (courseId, status) => {
+    setBusyId(courseId);
+    try {
+      await api.put(`/courses/${courseId}`, { status });
+      toast.success(status === 'published' ? 'Course published' : 'Course archived');
+      fetchCourses();
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to update course');
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const confirmDeleteCourse = async () => {
+    if (!courseToDelete) return;
+    const course = courseToDelete;
+    setBusyId(course.id);
+    try {
+      await api.delete(`/courses/${course.id}`);
+      toast.success('Course deleted');
+      setCourseToDelete(null);
+      fetchCourses();
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to delete course');
+    } finally {
+      setBusyId(null);
     }
   };
 
@@ -208,8 +243,96 @@ const Courses = () => {
                   </span>
                 )}
               </div>
+              {canManageCourse(course) && (
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {course.status !== 'published' && (
+                    <button
+                      type="button"
+                      onClick={() => updateCourseStatus(course.id, 'published')}
+                      disabled={busyId === course.id}
+                      className="text-xs font-medium px-2.5 py-1.5 rounded-md bg-green-600 text-white hover:bg-green-700 disabled:opacity-50"
+                    >
+                      Publish
+                    </button>
+                  )}
+                  {course.status !== 'archived' && (
+                    <button
+                      type="button"
+                      onClick={() => updateCourseStatus(course.id, 'archived')}
+                      disabled={busyId === course.id}
+                      className="text-xs font-medium px-2.5 py-1.5 rounded-md bg-gray-200 text-gray-800 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-600 disabled:opacity-50 inline-flex items-center gap-1"
+                    >
+                      <FiArchive className="w-3.5 h-3.5" />
+                      Archive
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => setCourseToDelete(course)}
+                    disabled={busyId === course.id}
+                    className="text-xs font-medium px-2.5 py-1.5 rounded-md bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 inline-flex items-center gap-1"
+                  >
+                    <FiTrash2 className="w-3.5 h-3.5" />
+                    Delete
+                  </button>
+                </div>
+              )}
             </div>
           ))}
+        </div>
+      )}
+
+      {courseToDelete && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+          onClick={() => busyId !== courseToDelete.id && setCourseToDelete(null)}
+        >
+          <div
+            className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl dark:bg-gray-800"
+            onClick={(event) => event.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="delete-course-title"
+          >
+            <div className="mb-4 flex items-start justify-between gap-3">
+              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-300">
+                <FiTrash2 className="h-5 w-5" />
+              </div>
+              <button
+                type="button"
+                onClick={() => setCourseToDelete(null)}
+                disabled={busyId === courseToDelete.id}
+                className="rounded-md p-1 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700"
+                aria-label="Close"
+              >
+                <FiX className="h-5 w-5" />
+              </button>
+            </div>
+            <h2 id="delete-course-title" className="text-xl font-semibold text-gray-900 dark:text-white">
+              Delete this course?
+            </h2>
+            <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
+              <span className="font-medium text-gray-900 dark:text-white">{courseToDelete.title}</span> will be removed, along with its enrollments, assignments, and quizzes.
+            </p>
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setCourseToDelete(null)}
+                disabled={busyId === courseToDelete.id}
+                className="btn-secondary"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={confirmDeleteCourse}
+                disabled={busyId === courseToDelete.id}
+                className="rounded-lg bg-red-600 px-4 py-2 font-medium text-white hover:bg-red-700 disabled:opacity-50"
+              >
+                {busyId === courseToDelete.id ? 'Deleting...' : 'Delete course'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../utils/api';
 import toast from 'react-hot-toast';
@@ -6,6 +7,8 @@ import { FiCheckSquare, FiClock, FiPlus, FiTrash2, FiCpu, FiEdit2 } from 'react-
 
 const Quizzes = () => {
   const { user } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const openedQuizRef = useRef(false);
   const [quizzes, setQuizzes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedQuiz, setSelectedQuiz] = useState(null);
@@ -39,6 +42,14 @@ const Quizzes = () => {
       fetchCourses();
     }
   }, []);
+
+  useEffect(() => {
+    const quizId = searchParams.get('take');
+    if (!quizId || openedQuizRef.current) return;
+    openedQuizRef.current = true;
+    setSearchParams({}, { replace: true });
+    startQuiz(quizId);
+  }, [searchParams]);
 
   useEffect(() => {
     if (selectedQuiz && timeRemaining > 0) {

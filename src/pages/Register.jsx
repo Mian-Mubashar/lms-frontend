@@ -15,18 +15,25 @@ const Register = () => {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [passwordMismatch, setPasswordMismatch] = useState(false);
+  const [shakeKey, setShakeKey] = useState(0);
   const { register } = useAuth();
   const navigate = useNavigate();
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    if (name === 'password' || name === 'confirmPassword') {
+      setPasswordMismatch(false);
+    }
+    setFormData({ ...formData, [name]: value });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
     if (formData.password !== formData.confirmPassword) {
-      alert('Passwords do not match');
+      setPasswordMismatch(true);
+      setShakeKey((key) => key + 1);
       return;
     }
 
@@ -135,7 +142,7 @@ const Register = () => {
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Password
               </label>
-              <div className="relative">
+              <div key={`password-${shakeKey}`} className={`relative ${passwordMismatch ? 'animate-shake' : ''}`}>
                 <input
                   type={showPassword ? 'text' : 'password'}
                   name="password"
@@ -143,7 +150,8 @@ const Register = () => {
                   onChange={handleChange}
                   required
                   minLength={6}
-                  className="input-field pr-10"
+                  aria-invalid={passwordMismatch}
+                  className={`input-field pr-10 ${passwordMismatch ? '!border-red-500 !ring-2 !ring-red-400' : ''}`}
                 />
                 <button
                   type="button"
@@ -160,14 +168,15 @@ const Register = () => {
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Confirm Password
               </label>
-              <div className="relative">
+              <div key={`confirm-${shakeKey}`} className={`relative ${passwordMismatch ? 'animate-shake' : ''}`}>
                 <input
                   type={showConfirmPassword ? 'text' : 'password'}
                   name="confirmPassword"
                   value={formData.confirmPassword}
                   onChange={handleChange}
                   required
-                  className="input-field pr-10"
+                  aria-invalid={passwordMismatch}
+                  className={`input-field pr-10 ${passwordMismatch ? '!border-red-500 !ring-2 !ring-red-400' : ''}`}
                 />
                 <button
                   type="button"
@@ -178,6 +187,9 @@ const Register = () => {
                   {showConfirmPassword ? <FiEyeOff className="w-4 h-4" /> : <FiEye className="w-4 h-4" />}
                 </button>
               </div>
+              {passwordMismatch && (
+                <p className="mt-2 text-sm text-red-600 dark:text-red-400">Passwords do not match</p>
+              )}
             </div>
 
             <button

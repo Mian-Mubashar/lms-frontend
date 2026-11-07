@@ -298,7 +298,13 @@ const CourseDetail = () => {
                     )}
                   </div>
                   {user?.role === 'student' && !quiz.lastAttempt && (
-                    <button className="btn-primary text-sm">Take Quiz</button>
+                    <button
+                      type="button"
+                      className="btn-primary text-sm"
+                      onClick={() => navigate(`/quizzes?take=${quiz.id}`)}
+                    >
+                      Take Quiz
+                    </button>
                   )}
                 </div>
               </div>

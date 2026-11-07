@@ -2,30 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../utils/api';
 import toast from 'react-hot-toast';
-import { FiSend, FiMessageCircle, FiVolume2 } from 'react-icons/fi';
-
-const getBackendOrigin = () => {
-  const baseURL = api.defaults.baseURL || '';
-  try {
-    const url = new URL(baseURL);
-    return `${url.protocol}//${url.host}`;
-  } catch {
-    return window.location.origin;
-  }
-};
-
-const resolveAudioUrl = (audioUrl) => {
-  if (!audioUrl) {
-    return '';
-  }
-  if (audioUrl.startsWith('data:')) {
-    return audioUrl;
-  }
-  if (/^https?:\/\//i.test(audioUrl)) {
-    return audioUrl;
-  }
-  return `${getBackendOrigin()}${audioUrl.startsWith('/') ? '' : '/'}${audioUrl}`;
-};
+import { FiSend, FiMessageCircle, FiVolume2, FiVolumeX } from 'react-icons/fi';
 
 const AIChatbot = () => {
   const { user } = useAuth();
@@ -34,7 +11,15 @@ const AIChatbot = () => {
   const [loading, setLoading] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState('');
   const [courses, setCourses] = useState([]);
+  const [speakingIndex, setSpeakingIndex] = useState(null);
   const messagesEndRef = useRef(null);
+  const speakingIndexRef = useRef(null);
+
+  useEffect(() => {
+    return () => {
+      window.speechSynthesis?.cancel();
+    };
+  }, []);
 
   useEffect(() => {
     fetchCourses();
@@ -89,31 +74,51 @@ const AIChatbot = () => {
     }
   };
 
-  const handleTextToSpeech = async (text) => {
-    try {
-      toast.loading('Preparing voice…', { id: 'tts' });
-      const response = await api.post('/ai/text-to-speech', {
-        text
-      });
-      
-      const audioSrc = resolveAudioUrl(response.data.audioUrl);
-      if (!audioSrc) {
-        throw new Error('Audio URL is missing');
-      }
+  const stopSpeech = () => {
+    speakingIndexRef.current = null;
+    setSpeakingIndex(null);
+    const synth = window.speechSynthesis;
+    if (!synth) return;
+    if (synth.paused) synth.resume();
+    synth.cancel();
+    toast.dismiss('tts');
+  };
 
-      const audio = new Audio(audioSrc);
-      audio.onended = () => {
-        toast.dismiss('tts');
-      };
-      audio.onerror = () => {
-        toast.error('Failed to play audio', { id: 'tts' });
-      };
-      audio.play();
-      toast.success('Voice playback started', { id: 'tts' });
-    } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to convert text to speech', { id: 'tts' });
-      console.error('TTS error:', error);
+  const handleTextToSpeech = (text, index) => {
+    if (!window.speechSynthesis) {
+      toast.error('Voice playback is not supported in this browser');
+      return;
     }
+
+    if (speakingIndexRef.current === index) {
+      stopSpeech();
+      return;
+    }
+
+    const spoken = String(text || '').replace(/\s+/g, ' ').trim();
+    if (!spoken) return;
+
+    stopSpeech();
+    const utterance = new SpeechSynthesisUtterance(spoken.slice(0, 3000));
+    utterance.lang = 'en-US';
+    utterance.onend = () => {
+      if (speakingIndexRef.current !== index) return;
+      speakingIndexRef.current = null;
+      setSpeakingIndex(null);
+      toast.dismiss('tts');
+    };
+    utterance.onerror = (event) => {
+      if (speakingIndexRef.current !== index) return;
+      speakingIndexRef.current = null;
+      setSpeakingIndex(null);
+      if (event?.error === 'interrupted' || event?.error === 'canceled') return;
+      toast.error('Failed to play audio', { id: 'tts' });
+    };
+
+    speakingIndexRef.current = index;
+    setSpeakingIndex(index);
+    window.speechSynthesis.speak(utterance);
+    toast.success('Voice playback started', { id: 'tts' });
   };
 
   return (
@@ -173,12 +178,17 @@ const AIChatbot = () => {
                   <div className="mt-2 flex items-center space-x-2">
                     <button
                       type="button"
-                      onClick={() => handleTextToSpeech(message.content)}
+                      onClick={() => handleTextToSpeech(message.content, index)}
                       className="text-sm text-primary-600 hover:text-primary-700 flex items-center px-2 py-1 rounded hover:bg-primary-50 dark:hover:bg-primary-900"
-                      title="Play this reply as voice (text-to-speech)"
+                      title={speakingIndex === index ? 'Stop voice' : 'Play this reply as voice'}
+                      aria-pressed={speakingIndex === index}
                     >
-                      <FiVolume2 className="w-4 h-4 mr-1 shrink-0" aria-hidden />
-                      Listen aloud
+                      {speakingIndex === index ? (
+                        <FiVolumeX className="w-4 h-4 mr-1 shrink-0" aria-hidden />
+                      ) : (
+                        <FiVolume2 className="w-4 h-4 mr-1 shrink-0" aria-hidden />
+                      )}
+                      {speakingIndex === index ? 'Stop' : 'Listen aloud'}
                     </button>
                   </div>
                 )}

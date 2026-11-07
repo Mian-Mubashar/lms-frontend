@@ -80,7 +80,10 @@ export const AuthProvider = ({ children }) => {
         error.response?.data?.message ||
         error.response?.data?.error ||
         error.response?.data?.errors?.[0]?.msg;
-      toast.error(serverMessage || 'Login failed');
+      const defaultMessage = !error.response
+        ? 'Cannot connect to backend server. Make sure backend is running on port 5000.'
+        : 'Login failed';
+      toast.error(serverMessage || defaultMessage);
       throw error;
     }
   };
@@ -99,7 +102,10 @@ export const AuthProvider = ({ children }) => {
         error.response?.data?.message ||
         error.response?.data?.error ||
         error.response?.data?.errors?.[0]?.msg;
-      toast.error(serverMessage || 'Registration failed');
+      const defaultMessage = !error.response
+        ? 'Cannot connect to backend server. Make sure backend is running on port 5000.'
+        : 'Registration failed';
+      toast.error(serverMessage || defaultMessage);
       throw error;
     }
   };
