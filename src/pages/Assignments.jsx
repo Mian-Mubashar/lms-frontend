@@ -161,7 +161,7 @@ const Assignments = () => {
             : ''
         ].filter(Boolean).join('\n\n')
       }));
-      toast.success(`AI template generated (${response.data.source || 'ai'} - ${response.data.mode || aiMode})`);
+      toast.success('Assignment template generated successfully!');
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to generate with AI');
     } finally {

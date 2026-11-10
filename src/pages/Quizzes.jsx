@@ -245,7 +245,7 @@ const Quizzes = () => {
 
       if (Array.isArray(response.data.questions) && response.data.questions.length > 0) {
         setCreateForm((prev) => ({ ...prev, questions: response.data.questions }));
-        toast.success(`Questions generated (${response.data.source || 'ai'} - ${response.data.mode || aiMode})`);
+        toast.success('Questions generated successfully!');
       } else {
         toast.error('AI returned no questions');
       }
