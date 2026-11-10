@@ -9,6 +9,7 @@ export function resolveMediaUrl(path) {
   const raw = String(path).trim();
   if (!raw) return '';
   if (/^https?:\/\//i.test(raw)) return raw;
+  if (/^data:/i.test(raw)) return raw;
 
   const normalized = raw.replace(/\\/g, '/');
   const withSlash = normalized.startsWith('/') ? normalized : `/${normalized}`;
