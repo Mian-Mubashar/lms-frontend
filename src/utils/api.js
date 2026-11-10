@@ -23,7 +23,7 @@ function normalizeApiBase() {
     );
     return null;
   }
-  return 'http://localhost:5000/api';
+  return 'http://localhost:5001/api';
 }
 
 const API_URL = normalizeApiBase();
